@@ -13,6 +13,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -99,8 +100,9 @@ public class StudentList extends AppCompatActivity {
                     break;
                 }
             }
-            if (!f)
+            if (!f) {
                 offlineAdapter.add(new StudentItem(entry.getKey(), entry.getValue(), false));
+            }
         }
 
         onlineAdapter.notifyDataSetChanged();
@@ -108,9 +110,14 @@ public class StudentList extends AppCompatActivity {
     }
 
     public void selectAll(View view) {
-        SparseBooleanArray checked = onlineList.getCheckedItemPositions();
+        StudentItem student;
+        StudentAdapter.ViewHolder holder;
         for (int i= 0; i < onlineList.getCount(); i++) {
-
+            student = onlineAdapter.getItem(i);
+            student.setChecked(true);
+            holder = (StudentAdapter.ViewHolder) onlineList.getChildAt(i).getTag();
+            holder.getCheckBox().setChecked(true);
         }
     }
+
 }
