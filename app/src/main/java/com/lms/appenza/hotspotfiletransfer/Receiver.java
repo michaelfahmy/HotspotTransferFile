@@ -1,101 +1,32 @@
 package com.lms.appenza.hotspotfiletransfer;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
-
-    public static final String LOG_TAG = "HOTSPOTMM";
-    public static final int CHOOSE_FILE_REQUEST_CODE = 10;
-    public static  Uri uri ;
-    ProgressDialog progress;
-    WifiManager manager;
+public class Receiver extends AppCompatActivity {
+    private static boolean server_running = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        progress= new ProgressDialog(this);
-        manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-
-
-    }
-
-
-
-    public void send(View view) {
-
-        if(!manager.isWifiEnabled()) {
-            setWifiApEnabled(null, false);
-            manager.setWifiEnabled(true);
-        }
-        chooseFile();
+        setContentView(R.layout.activity_receiver);
+            new FileServerTask().execute();
+            //server_running=true;
 
     }
-
-    public void chooseFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, CHOOSE_FILE_REQUEST_CODE);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == CHOOSE_FILE_REQUEST_CODE) {
-            uri = data.getData();
-            Log.d(LOG_TAG, "Uri: " + uri.toString());
-            startActivity(new Intent(this, StudentList.class));
-//            Intent serviceIntent = new Intent(this, FileTransferService.class);
-//            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-//            serviceIntent.setData(uri);
-//            startService(serviceIntent);
-        }
-    }
-
-
-    public void recieve(View view) {
-        setWifiApEnabled(null, true);
-        progress.setMessage("Receiving...");
-        progress.show();
-        new FileServerTask().execute();
-    }
-
-
-    private boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
-        try {
-            if (enabled) { // disable WiFi in any case
-                manager.setWifiEnabled(false);
-            }
-            Method method = manager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
-            return (Boolean) method.invoke(manager, wifiConfig, enabled);
-        } catch (Exception e) {
-            Log.e(this.getClass().toString(), "", e);
-            return false;
-        }
-    }
-
 
     private class FileServerTask extends AsyncTask<Void, Void, File> {
 
@@ -129,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Log.d(LOG_TAG, "File not copied");
                 }
-                client.close();
-                serverSocket.close();
-                Log.d(LOG_TAG, "Server Conn closed");
+                //client.close();
+                //server_running = false;
+                Log.d(LOG_TAG,"Server Conn closed");
+                finish();
                 return file;
 
             } catch (IOException e) {
@@ -162,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(File f) {
             Log.d(LOG_TAG, "File Uri: " + Uri.fromFile(f));
             if (f != null) {
-                progress.dismiss();
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.fromFile(f), "image/*");
                 startActivity(intent);
@@ -170,8 +101,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-
 
 
 }
