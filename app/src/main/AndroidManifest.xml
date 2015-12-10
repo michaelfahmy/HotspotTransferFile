@@ -29,8 +29,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".StudentList" />
-        <activity android:name=".Receiver" >
-        </activity>
     </application>
 
 </manifest>

@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -128,11 +129,7 @@ public class StudentList extends AppCompatActivity {
 
     public void sendQuizToStudents(View view){
         new ClientTask().execute(MainActivity.uri);
-//        Intent serviceIntent = new Intent(this, FileTransferService.class);
-//        serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-//        Log.d(LOG_TAG,"Set action");
-//        serviceIntent.setData(MainActivity.uri);
-//        startService(serviceIntent);
+
     }
 
     private class ClientTask extends AsyncTask<Uri, Void, Void> {
@@ -153,6 +150,9 @@ public class StudentList extends AppCompatActivity {
                 ContentResolver cr = context.getContentResolver();
                 InputStream inputStream = cr.openInputStream(params[0]);
                 OutputStream outputStream = socket.getOutputStream();
+
+                DataOutputStream dos = new DataOutputStream(outputStream);
+                dos.writeUTF(params[0].getLastPathSegment());
 
                 if(copyFile(inputStream, outputStream)) {
                     Log.d(LOG_TAG, "File copied");
