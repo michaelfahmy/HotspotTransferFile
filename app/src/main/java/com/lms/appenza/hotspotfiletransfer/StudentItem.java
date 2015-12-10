@@ -7,12 +7,13 @@ public class StudentItem {
     String studentName;
     String studentMAC;
     String studentClass;
-    String school;
+    String school,SSID;
     boolean checked;
 
-    public StudentItem(String name, String mac, boolean checked) {
+    public StudentItem(String name,String ssid, String mac, boolean checked) {
         this.studentName = name;
         this.studentMAC = mac;
+        this.SSID=ssid;
         this.checked = checked;
     }
 
@@ -30,6 +31,10 @@ public class StudentItem {
     }
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public String getSSID() {
+        return SSID;
     }
 
     public void toggleChecked() {

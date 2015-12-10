@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -25,10 +26,9 @@ public class StudentAdapter extends ArrayAdapter<StudentItem> {
     }
 
     class ViewHolder {
-        CheckBox checkBox;
-        TextView textView;
-        public CheckBox getCheckBox() {
-            return checkBox;
+        CheckedTextView checkedTextView;
+        public CheckedTextView getCheckedTextView() {
+            return checkedTextView;
         }
     }
 
@@ -41,15 +41,14 @@ public class StudentAdapter extends ArrayAdapter<StudentItem> {
             convertView = inflater.inflate(R.layout.list_item, parent, false);
 
             holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById( R.id.student );
-            holder.checkBox = (CheckBox) convertView.findViewById( R.id.checkBox );
-
+            holder.checkedTextView = (CheckedTextView) convertView.findViewById(R.id.checkedText);
             convertView.setTag(holder);
 
-            holder.checkBox.setOnClickListener( new View.OnClickListener() {
+            holder.checkedTextView.setOnClickListener( new View.OnClickListener() {
                 public void onClick(View v) {
-                    CheckBox cb = (CheckBox) v;
+                    CheckedTextView cb = (CheckedTextView) v;
                     StudentItem student = (StudentItem) cb.getTag();
+                    cb.setChecked(!cb.isChecked());
                     student.setChecked(cb.isChecked());
                 }
             });
@@ -59,10 +58,12 @@ public class StudentAdapter extends ArrayAdapter<StudentItem> {
 
         StudentItem student = getItem(position);
 
-        holder.checkBox.setTag( student );
-        holder.checkBox.setChecked( student.isChecked() );
-        holder.textView.setText( student.getName() );
-
+//        holder.checkBox.setTag( student );
+//        holder.checkBox.setChecked( student.isChecked() );
+//        holder.textView.setText( student.getName() );
+        holder.checkedTextView.setTag(student);
+        holder.checkedTextView.setChecked(student.isChecked());
+        holder.checkedTextView.setText(student.getName());
 
         return convertView;
     }

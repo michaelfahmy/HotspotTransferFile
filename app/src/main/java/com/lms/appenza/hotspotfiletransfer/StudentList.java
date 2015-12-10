@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -36,7 +38,7 @@ public class StudentList extends AppCompatActivity {
     List<ScanResult> scanResults;
     StudentAdapter onlineAdapter, offlineAdapter;
     ListView onlineList, offlineList;
-
+    WifiConfiguration conf ;
 
 
     @Override
@@ -50,7 +52,7 @@ public class StudentList extends AppCompatActivity {
 
         manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         scanResults = new ArrayList<ScanResult>();
-
+        conf = new WifiConfiguration();
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -63,14 +65,14 @@ public class StudentList extends AppCompatActivity {
         onlineList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                StudentItem student = onlineAdapter.getItem(position);
-                student.toggleChecked();
-                StudentAdapter.ViewHolder viewHolder = (StudentAdapter.ViewHolder) view.getTag();
-                viewHolder.getCheckBox().setChecked(student.isChecked());
+//                StudentItem student = onlineAdapter.getItem(position);
+//                student.toggleChecked();
+//                StudentAdapter.ViewHolder viewHolder = (StudentAdapter.ViewHolder) view.getTag();
+//                viewHolder.getCheckedTextView().setChecked(student.isChecked());
             }
         });
-        onlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.student, new ArrayList<StudentItem>());
-        offlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.student, new ArrayList<StudentItem>());
+        onlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.checkedText, new ArrayList<StudentItem>());
+        offlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.checkedText, new ArrayList<StudentItem>());
         onlineList.setAdapter(onlineAdapter);
         offlineList.setAdapter(offlineAdapter);
 
@@ -123,12 +125,27 @@ public class StudentList extends AppCompatActivity {
             student = onlineAdapter.getItem(i);
             student.setChecked(true);
             holder = (StudentAdapter.ViewHolder) onlineList.getChildAt(i).getTag();
-            holder.getCheckBox().setChecked(true);
+            holder.getCheckedTextView().setChecked(true);
         }
     }
 
     public void sendQuizToStudents(View view){
-        new ClientTask().execute(MainActivity.uri);
+//        SparseBooleanArray checked = onlineList.getCheckedItemPositions();
+//        for(int i=0 ; i<onlineList.getCount();i++){
+//            if (checked.get(i)){
+//                Log.d(LOG_TAG,"i = "+i);
+////                new ClientTask().execute(MainActivity.uri);
+//            }
+//        }
+
+        for(int i = 0;i<onlineAdapter.getCount();i++){
+            if(onlineAdapter.getItem(i).isChecked()){
+                conf.SSID="\""+onlineAdapter.getItem(i).getSSID()+"\"";
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            }
+
+        }
+
 
     }
 
