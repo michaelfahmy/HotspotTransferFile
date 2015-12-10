@@ -15,6 +15,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
+        intent.setType("*/*");
         startActivityForResult(intent, CHOOSE_FILE_REQUEST_CODE);
     }
 
@@ -65,12 +68,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == CHOOSE_FILE_REQUEST_CODE) {
             uri = data.getData();
-            Log.d(LOG_TAG, "Uri: " + uri.toString());
+            Log.d(LOG_TAG, "Uri: " + uri.toString()) ;
             startActivity(new Intent(this, StudentList.class));
-//            Intent serviceIntent = new Intent(this, FileTransferService.class);
-//            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-//            serviceIntent.setData(uri);
-//            startService(serviceIntent);
+
         }
     }
 
@@ -109,8 +109,11 @@ public class MainActivity extends AppCompatActivity {
                 Socket client = serverSocket.accept();
                 Log.d(LOG_TAG, "Server: connection accepted");
 
+                InputStream inputStream = client.getInputStream();
+                DataInputStream dis = new DataInputStream(inputStream);
+                String fname = dis.readUTF();
 
-                File file = new File(Environment.getExternalStorageDirectory() + "/HotspotSharedFiles/file" +System.currentTimeMillis() + ".jpg");
+                File file = new File(Environment.getExternalStorageDirectory() + "/HotspotSharedFiles/" + fname);
                 File dirs = new File(file.getParent());
                 if (!dirs.exists())
                     dirs.mkdirs();
@@ -119,10 +122,8 @@ public class MainActivity extends AppCompatActivity {
                 else
                     Log.d(LOG_TAG, "file not created");
 
-
-
-                InputStream inputStream = client.getInputStream();
                 FileOutputStream outputStream = new FileOutputStream(file);
+
 
                 if(copyFile(inputStream, outputStream)) {
                     Log.d(LOG_TAG, "File received");
@@ -163,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "File Uri: " + Uri.fromFile(f));
             if (f != null) {
                 progress.dismiss();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(f), "image/*");
-                startActivity(intent);
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setDataAndType(Uri.fromFile(f), "*/*");
+//                startActivity(intent);
             }
         }
 
