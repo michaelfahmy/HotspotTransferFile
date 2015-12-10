@@ -4,14 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-    <CheckBox
+    <CheckedTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/checkBox" />
+        android:id="@+id/checkedText"
+        android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/student" />
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/student" />-->
 
 </LinearLayout>
