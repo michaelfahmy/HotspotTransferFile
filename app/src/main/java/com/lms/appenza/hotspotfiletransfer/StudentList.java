@@ -120,4 +120,8 @@ public class StudentList extends AppCompatActivity {
         }
     }
 
+    public void send(View view) {
+
+
+    }
 }
