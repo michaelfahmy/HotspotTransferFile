@@ -5,23 +5,24 @@ package com.lms.appenza.hotspotfiletransfer;
  */
 public class StudentItem {
     String studentName;
+    String studentSSID;
     String studentMAC;
     String studentClass;
-    String school,SSID;
+    String school;
     boolean checked;
 
     public StudentItem(String name,String ssid, String mac, boolean checked) {
         this.studentName = name;
+        this.studentSSID = ssid;
         this.studentMAC = mac;
-        this.SSID=ssid;
         this.checked = checked;
     }
 
     public String getName() {
         return studentName;
     }
-    public void setName(String name) {
-        this.studentName = name;
+    public String getSSID() {
+        return studentSSID;
     }
     public String getMAC() {
         return studentMAC;
@@ -31,10 +32,6 @@ public class StudentItem {
     }
     public void setChecked(boolean checked) {
         this.checked = checked;
-    }
-
-    public String getSSID() {
-        return SSID;
     }
 
     public void toggleChecked() {

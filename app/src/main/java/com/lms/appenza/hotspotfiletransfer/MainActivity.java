@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected File doInBackground(Void... params) {
             try {
-                ServerSocket serverSocket = new ServerSocket(8000);
+                ServerSocket serverSocket = new ServerSocket(StudentList.PORT);
                 Log.d(LOG_TAG, "Server: socket opened");
                 Socket client = serverSocket.accept();
                 Log.d(LOG_TAG, "Server: connection accepted");
@@ -128,13 +128,12 @@ public class MainActivity extends AppCompatActivity {
                 if(copyFile(inputStream, outputStream)) {
                     Log.d(LOG_TAG, "File received");
                 } else {
-                    Log.d(LOG_TAG, "File not copied");
+                    Log.d(LOG_TAG, "File not received");
                 }
                 client.close();
                 serverSocket.close();
-                Log.d(LOG_TAG, "Server Conn closed");
+                Log.d(LOG_TAG, "Server: socket closed");
                 return file;
-
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(LOG_TAG, e.toString());
@@ -164,9 +163,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "File Uri: " + Uri.fromFile(f));
             if (f != null) {
                 progress.dismiss();
-//                Intent intent = new Intent(Intent.ACTION_VIEW);
-//                intent.setDataAndType(Uri.fromFile(f), "*/*");
-//                startActivity(intent);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(f), "*/*");
+                startActivity(intent);
             }
         }
 

@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -46,12 +47,13 @@ public class StudentList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_list);
 
-        json.put("tmp", "eg:gg:df:gd");
+        json.put("tmp", "xx:xx:xx:xx:xx:xx");
         json.put("huawei", "58:2a:f7:a9:7f:20");
-        json.put("lenovo", "ee:89:f5:3c:f7:3c");
+        json.put("lenovo1", "ee:89:f5:3c:f7:3c");
+        json.put("lenovo2", "16:36:c6:a8:45:87");
 
         manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        scanResults = new ArrayList<ScanResult>();
+        scanResults = new ArrayList<>();
         conf = new WifiConfiguration();
         registerReceiver(new BroadcastReceiver() {
             @Override
@@ -62,15 +64,15 @@ public class StudentList extends AppCompatActivity {
 
         onlineList = (ListView) findViewById(R.id.online_list);
         offlineList = (ListView) findViewById(R.id.offline_list);
-        onlineList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        onlineList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                StudentItem student = onlineAdapter.getItem(position);
 //                student.toggleChecked();
 //                StudentAdapter.ViewHolder viewHolder = (StudentAdapter.ViewHolder) view.getTag();
 //                viewHolder.getCheckedTextView().setChecked(student.isChecked());
-            }
-        });
+//            }
+//        });
         onlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.checkedText, new ArrayList<StudentItem>());
         offlineAdapter = new StudentAdapter(this, R.layout.list_item, R.id.checkedText, new ArrayList<StudentItem>());
         onlineList.setAdapter(onlineAdapter);
@@ -91,7 +93,7 @@ public class StudentList extends AppCompatActivity {
 
         manager.startScan();
 
-        Log.d(LOG_TAG, "size ============= " + scanResults.size());
+        Log.d(LOG_TAG, "Open networks ============= " + scanResults.size());
 
         onlineAdapter.clear();
         offlineAdapter.clear();
@@ -100,17 +102,17 @@ public class StudentList extends AppCompatActivity {
 
         for (Map.Entry<String, String> entry : json.entrySet()) {
             f = false;
-            String studentMAC = entry.getValue();
+            String studentBSSID = entry.getValue();
             for (int j = 0; j < scanResults.size(); j++) {
-                Log.d(LOG_TAG, scanResults.get(j).SSID + " : " + scanResults.get(j).BSSID);
-                if(studentMAC.equals(scanResults.get(j).BSSID)) {
-                    onlineAdapter.add(new StudentItem(entry.getKey(), entry.getValue(), false));
+                String networkBSSID = scanResults.get(j).BSSID;
+                if(studentBSSID.equals(networkBSSID)) {
+                    onlineAdapter.add(new StudentItem(entry.getKey(), scanResults.get(j).SSID, studentBSSID, false));
                     f = true;
                     break;
                 }
             }
             if (!f) {
-                offlineAdapter.add(new StudentItem(entry.getKey(), entry.getValue(), false));
+                offlineAdapter.add(new StudentItem(entry.getKey(), null, studentBSSID, false));
             }
         }
 
@@ -130,24 +132,28 @@ public class StudentList extends AppCompatActivity {
     }
 
     public void sendQuizToStudents(View view){
-//        SparseBooleanArray checked = onlineList.getCheckedItemPositions();
-//        for(int i=0 ; i<onlineList.getCount();i++){
-//            if (checked.get(i)){
-//                Log.d(LOG_TAG,"i = "+i);
-////                new ClientTask().execute(MainActivity.uri);
-//            }
-//        }
-
-        for(int i = 0;i<onlineAdapter.getCount();i++){
+        for(int i = 0; i < onlineAdapter.getCount(); i++){
             if(onlineAdapter.getItem(i).isChecked()){
-                conf.SSID="\""+onlineAdapter.getItem(i).getSSID()+"\"";
+                conf.SSID = "\"" + onlineAdapter.getItem(i).getSSID() + "\"";
                 conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                manager.addNetwork(conf);
+                List<WifiConfiguration> list = manager.getConfiguredNetworks();
+                for( WifiConfiguration j : list ) {
+                    if(j.SSID != null && j.SSID.equals("\"" + onlineAdapter.getItem(i).getSSID() + "\"")) {
+                        manager.disconnect();
+                        manager.enableNetwork(j.networkId, true);
+                        manager.reconnect();
+                        Log.d(LOG_TAG, "CONNECTED to " + j.SSID);
+                        new ClientTask().execute(MainActivity.uri);
+                        break;
+                    }
+                }
             }
-
         }
-
-
     }
+
+    public static final String HOST = "192.168.43.1";
+    public static final int PORT = 8000;
 
     private class ClientTask extends AsyncTask<Uri, Void, Void> {
 
@@ -160,7 +166,7 @@ public class StudentList extends AppCompatActivity {
                 Log.d(LOG_TAG, "Client: socket opened");
                 socket.bind(null);
                 Log.d(LOG_TAG, "Client: connection requested");
-                socket.connect(new InetSocketAddress("192.168.43.1", 8000));
+                socket.connect(new InetSocketAddress(HOST, PORT));
                 Log.d(LOG_TAG, "Client: socket connected");
 
 
@@ -172,16 +178,17 @@ public class StudentList extends AppCompatActivity {
                 dos.writeUTF(params[0].getLastPathSegment());
 
                 if(copyFile(inputStream, outputStream)) {
-                    Log.d(LOG_TAG, "File copied");
+                    Log.d(LOG_TAG, "File sent");
                 } else {
-                    Log.d(LOG_TAG, "File not copied");
+                    Log.d(LOG_TAG, "File not sent");
                 }
 
                 if (inputStream != null) {
                     inputStream.close();
                 }
-                //outputStream.close();
-                //socket.close();
+                outputStream.close();
+                socket.close();
+                Log.d(LOG_TAG, "Client: socket closed");
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.toString());
             }
